@@ -1,0 +1,69 @@
+<Window x:Class="VantageWorkstationPlus.Dialogs.LoginDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Histology Workstation Plus - 登录"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="{StaticResource B.Bg}"
+        FontFamily="{StaticResource F.Default}"
+        MinWidth="800" MinHeight="600">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶栏：拖拽 + 关闭 -->
+        <Grid Grid.Row="0" Height="36" Background="{StaticResource B.Surface}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" Text="Histology Workstation Plus"
+                       Style="{StaticResource T.Caption}"
+                       VerticalAlignment="Center" Margin="16,0"
+                       MouseLeftButtonDown="Title_DragWindow" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button x:Name="btnMinimize" Content="—" Style="{StaticResource Btn.Ghost}"
+                        MinWidth="46" MinHeight="36" FontSize="14" ToolTip="最小化"
+                        Click="BtnMinimize_Click" />
+                <Button x:Name="btnClose" Content="✕" Style="{StaticResource Btn.Ghost}"
+                        MinWidth="46" MinHeight="36" FontSize="14" ToolTip="退出"
+                        Click="BtnCancel_Click" />
+            </StackPanel>
+        </Grid>
+
+        <!-- 中间居中卡片 -->
+        <Grid Grid.Row="1" Background="{StaticResource B.Bg}">
+            <Border Style="{StaticResource Card}" Width="440" VerticalAlignment="Center" Padding="40,36">
+                <StackPanel>
+                    <TextBlock Text="登录" Style="{StaticResource T.H1}" Margin="0,0,0,4" />
+                    <TextBlock Text="Histology Workstation Plus 批量工作站"
+                               Style="{StaticResource T.Caption}" Margin="0,0,0,28" />
+
+                    <TextBlock Text="服务器" Style="{StaticResource T.Label}" Margin="0,0,0,6" />
+                    <TextBox x:Name="txtUrl" Text="http://192.168.127.128" Margin="0,0,0,18" />
+
+                    <TextBlock Text="用户名" Style="{StaticResource T.Label}" Margin="0,0,0,6" />
+                    <TextBox x:Name="txtUsername" Text="adminuser" MaxLength="25" Margin="0,0,0,18" />
+
+                    <TextBlock Text="密码" Style="{StaticResource T.Label}" Margin="0,0,0,6" />
+                    <PasswordBox x:Name="txtPassword" Margin="0,0,0,12" />
+
+                    <TextBlock x:Name="lblError" TextWrapping="Wrap" MinHeight="32"
+                               Foreground="{StaticResource B.Error}" Style="{StaticResource T.Caption}"
+                               Margin="0,8,0,12" />
+
+                    <Button x:Name="btnLogin" Content="登录"
+                            Style="{StaticResource Btn.Primary}" Height="42" FontSize="14"
+                            IsDefault="True" Click="BtnLogin_Click" Margin="0,0,0,8" />
+                    <Button x:Name="btnCancel" Content="退出"
+                            Style="{StaticResource Btn.Secondary}" Height="38"
+                            Click="BtnCancel_Click" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

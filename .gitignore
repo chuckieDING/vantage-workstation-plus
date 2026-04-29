@@ -1,0 +1,24 @@
+# Build / publish 中间产物
+bin/
+obj/
+
+# IDE
+.vs/
+.vscode/
+*.suo
+*.user
+
+# 日志
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.bak
+*~
+
+# 用户特定的 publish 目录中除最终产物外其他都跳过
+publish-fx/*.pdb

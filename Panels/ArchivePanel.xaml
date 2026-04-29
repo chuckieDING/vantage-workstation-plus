@@ -1,0 +1,80 @@
+<UserControl x:Class="VantageWorkstationPlus.Panels.ArchivePanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Grid Margin="32,28" MaxWidth="1400" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="批量归档" Style="{StaticResource T.H1}" />
+            <TextBlock Text="Specimen Archive — 按 Case 分组批量提交归档" Style="{StaticResource T.Caption}" Margin="0,4,0,0" />
+        </StackPanel>
+
+        <Border Grid.Row="1" Style="{StaticResource Card}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="100" />
+                        <ColumnDefinition Width="Auto" MinWidth="280" MaxWidth="640" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="文件" Style="{StaticResource T.Label}" Margin="0,8" />
+                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtFile" IsReadOnly="True" Margin="0,6,12,6"
+                             HorizontalScrollBarVisibility="Auto" />
+                    <Button Grid.Row="0" Grid.Column="2" Content="选择..." Style="{StaticResource Btn.Secondary}"
+                            Click="BtnBrowse_Click" Margin="0,6" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="归档位置" Style="{StaticResource T.Label}" Margin="0,8" />
+                    <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" x:Name="cboLocation" Margin="0,6" />
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,16,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="120" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="对象预览（玻片/蜡块）" Style="{StaticResource T.Label}" Margin="0,0,0,6" />
+                    <Border Grid.Row="1" BorderBrush="{StaticResource B.Border}" BorderThickness="1" CornerRadius="6">
+                        <ListBox x:Name="lstObjects" BorderThickness="0" Background="{StaticResource B.SurfaceAlt}" />
+                    </Border>
+                </Grid>
+
+                <Grid Grid.Row="2" Margin="0,16,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" x:Name="btnRun" Content="开始批量归档"
+                            Style="{StaticResource Btn.Primary}" Click="BtnRun_Click"
+                            Margin="0,0,12,0" MinWidth="140" />
+                    <ProgressBar Grid.Column="1" x:Name="progress" Minimum="0" Value="0" VerticalAlignment="Center" />
+                </Grid>
+
+                <TextBlock Grid.Row="3" Text="操作日志" Style="{StaticResource T.Label}" Margin="0,16,0,6" />
+                <Border Grid.Row="4" BorderBrush="{StaticResource B.Border}" BorderThickness="1" CornerRadius="6"
+                        Background="{StaticResource B.SurfaceAlt}">
+                    <ScrollViewer x:Name="logScroll" VerticalScrollBarVisibility="Auto">
+                        <TextBox x:Name="logBox" IsReadOnly="True" BorderThickness="0" Background="Transparent"
+                                 FontFamily="{StaticResource F.Mono}" FontSize="12" TextWrapping="Wrap" />
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

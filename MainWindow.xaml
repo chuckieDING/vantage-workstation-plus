@@ -1,0 +1,78 @@
+<Window x:Class="VantageWorkstationPlus.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Histology Workstation Plus"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        WindowStyle="None"
+        Background="{StaticResource B.Bg}"
+        FontFamily="{StaticResource F.Default}"
+        MinWidth="1100" MinHeight="720"
+        Closing="Window_Closing">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 顶栏 -->
+        <Grid Grid.Row="0" Height="48" Background="{StaticResource B.Surface}"
+              MouseLeftButtonDown="Title_DragWindow">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Background="{StaticResource B.SidebarBg}">
+                <TextBlock Text="批量工作站" FontSize="15" FontWeight="SemiBold"
+                           Foreground="White" VerticalAlignment="Center" Margin="20,0" />
+            </Border>
+            <TextBlock Grid.Column="1" x:Name="lblTitle" Text=""
+                       Style="{StaticResource T.H3}" VerticalAlignment="Center" Margin="20,0" />
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+                <TextBlock x:Name="lblWelcome" VerticalAlignment="Center"
+                           Style="{StaticResource T.Caption}" Margin="0,0,16,0" />
+                <Button x:Name="btnLogout" Content="切换账号"
+                        Style="{StaticResource Btn.Secondary}"
+                        Click="BtnLogout_Click" />
+            </StackPanel>
+            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="btnMinimize" Content="—" Style="{StaticResource Btn.Ghost}"
+                        MinWidth="46" MinHeight="36" FontSize="14"
+                        ToolTip="最小化" Click="BtnMinimize_Click" />
+                <Button x:Name="btnClose" Content="✕" Style="{StaticResource Btn.Ghost}"
+                        MinWidth="46" MinHeight="36"
+                        ToolTip="退出" Click="BtnExit_Click" />
+            </StackPanel>
+        </Grid>
+
+        <!-- 主区：侧栏 + 内容 -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ListBox x:Name="lstMenu" Grid.Column="0"
+                     Style="{StaticResource Sidebar.ListBox}"
+                     ItemContainerStyle="{StaticResource Sidebar.Item}"
+                     SelectionChanged="LstMenu_SelectionChanged">
+                <ListBoxItem Tag="signoff">
+                    <TextBlock Text="批量出片" />
+                </ListBoxItem>
+                <ListBoxItem Tag="dehydration">
+                    <TextBlock Text="批量脱水" />
+                </ListBoxItem>
+                <ListBoxItem Tag="archive">
+                    <TextBlock Text="批量归档" />
+                </ListBoxItem>
+                <ListBoxItem Tag="transfer">
+                    <TextBlock Text="批量流转" />
+                </ListBoxItem>
+            </ListBox>
+
+            <ContentControl x:Name="content" Grid.Column="1" Background="{StaticResource B.Bg}" />
+        </Grid>
+    </Grid>
+</Window>
