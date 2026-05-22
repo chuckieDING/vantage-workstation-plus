@@ -88,8 +88,26 @@ namespace VantageWorkstationPlus.Dialogs
                         "然后把分配到的 WorkCellID 填进 appsettings.json 的 WorkCellId 字段。" + hint);
                 }
 
-                // SOAP 登录（脱水用）
-                await ts.LoginAsync(user, pwd, App.WorkCellType, App.WorkCellId);
+                // SOAP 登录（脱水用）；失败把响应体 dump 出来辅助排查
+                try
+                {
+                    await ts.LoginAsync(user, pwd, App.WorkCellType, App.WorkCellId);
+                }
+                catch (Exception loginEx)
+                {
+                    try
+                    {
+                        string dumpPath = System.IO.Path.Combine(
+                            System.IO.Path.GetTempPath(), "vantage_login_fail.xml");
+                        System.IO.File.WriteAllText(dumpPath,
+                            $"<!-- WorkCellId={App.WorkCellId} WorkCellType={App.WorkCellType} -->\n" +
+                            ts.LastResponseBody);
+                        throw new InvalidOperationException(
+                            loginEx.Message + $"\n（最后响应体 dump → {dumpPath}）", loginEx);
+                    }
+                    catch (InvalidOperationException) { throw; }
+                    catch { throw loginEx; }
+                }
 
                 // Web 登录（出片 / 归档 / 流转用）
                 var webSess = new AppSession(url, App.AcceptAnyServerCert);
