@@ -136,24 +136,49 @@ namespace VantageWorkstationPlus.Services
 
         // ============== Login ==============
 
-        /// <summary>带密码登录（对应 ValidateUserNamePasswordAndPrivilege）。</summary>
-        public Task<LoggedUser> LoginAsync(string userName, string password,
+        /// <summary>登录：依工作站 PasswordRequired 设置自动选 SOAP 方法。
+        /// 原版 WPF 在 PasswordRequired=false 时调 ValidateUserNameAndPrivilege（不带密码），
+        /// =true 时调 ValidateUserNamePasswordAndPrivilege。我们不知道服务端设置，先试无密码版，
+        /// 失败（FailedMissingCredentials / HTTP 500 / FailedUnknownError）再退回带密码版。</summary>
+        public async Task<LoggedUser> LoginAsync(string userName, string password,
             string workCellType, int workCellId)
         {
-            string body = $@"<userName>{Esc(userName)}</userName>
+            string noPwdBody = $@"<userName>{Esc(userName)}</userName>
+<loggedInUserName/>
+<workCellType>{workCellType}</workCellType>
+<workCellID>{workCellId}</workCellID>
+<isScreenLocked>false</isScreenLocked>";
+            try
+            {
+                return await DoLoginAsync("ValidateUserNameAndPrivilege", noPwdBody, SecurityPath);
+            }
+            catch (InvalidCredentialException ex) when (
+                ex.Message.Contains("FailedMissingCredentials") ||
+                ex.Message.Contains("FailedInvalidPassword") ||
+                ex.Message.Contains("FailedUnknownError"))
+            {
+                // 工作站要求密码，改用带密码版
+            }
+            catch (InvalidOperationException ex) when (ex.Message.Contains("HTTP 500"))
+            {
+                // 服务端拒了无密码调用（PasswordRequired=true 时常见的 HTTP 500: Unknown）
+            }
+
+            string withPwdBody = $@"<userName>{Esc(userName)}</userName>
 <password>{Esc(password)}</password>
 <loggedInUserName/>
 <workCellType>{workCellType}</workCellType>
 <workCellID>{workCellId}</workCellID>
 <isScreenLocked>false</isScreenLocked>";
-            return DoLoginAsync("ValidateUserNamePasswordAndPrivilege", body, SecurityPath);
+            return await DoLoginAsync("ValidateUserNamePasswordAndPrivilege", withPwdBody, SecurityPath);
         }
 
         private async Task<LoggedUser> DoLoginAsync(string method, string innerXml, string asmxPath)
         {
             var resp = await PostSoapAsync(asmxPath, method, innerXml);
             var result = resp.Element(TempNs + $"{method}Result")?.Value?.Trim();
-            if (!string.Equals(result, "Succeeded", StringComparison.OrdinalIgnoreCase))
+            // SucceededXxx 系列都算成功
+            if (!result?.StartsWith("Succeeded", StringComparison.OrdinalIgnoreCase) ?? true)
                 throw new InvalidCredentialException($"SOAP 登录失败: {result ?? "(无 Result)"}");
             var info = resp.Element(TempNs + "userInfo");
             var u = new LoggedUser

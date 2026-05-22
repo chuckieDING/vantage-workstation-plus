@@ -22,3 +22,8 @@ Thumbs.db
 
 # 用户特定的 publish 目录中除最终产物外其他都跳过
 publish-fx/*.pdb
+
+# self-contained 版本太大（~163 MB），走 GitHub Release 不进 git
+publish-sc/
+*.tar.gz
+*.zip
