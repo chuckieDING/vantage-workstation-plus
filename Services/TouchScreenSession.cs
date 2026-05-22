@@ -148,20 +148,15 @@ namespace VantageWorkstationPlus.Services
 <workCellType>{workCellType}</workCellType>
 <workCellID>{workCellId}</workCellID>
 <isScreenLocked>false</isScreenLocked>";
+            Exception? firstError = null;
             try
             {
                 return await DoLoginAsync("ValidateUserNameAndPrivilege", noPwdBody, SecurityPath);
             }
-            catch (InvalidCredentialException ex) when (
-                ex.Message.Contains("FailedMissingCredentials") ||
-                ex.Message.Contains("FailedInvalidPassword") ||
-                ex.Message.Contains("FailedUnknownError"))
+            catch (Exception ex)
             {
-                // 工作站要求密码，改用带密码版
-            }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("HTTP 500"))
-            {
-                // 服务端拒了无密码调用（PasswordRequired=true 时常见的 HTTP 500: Unknown）
+                firstError = ex;
+                LastResponseBody = LastResponseBody + "\n--- 1st (no-pwd) failed: " + ex.Message;
             }
 
             string withPwdBody = $@"<userName>{Esc(userName)}</userName>
@@ -170,7 +165,15 @@ namespace VantageWorkstationPlus.Services
 <workCellType>{workCellType}</workCellType>
 <workCellID>{workCellId}</workCellID>
 <isScreenLocked>false</isScreenLocked>";
-            return await DoLoginAsync("ValidateUserNamePasswordAndPrivilege", withPwdBody, SecurityPath);
+            try
+            {
+                return await DoLoginAsync("ValidateUserNamePasswordAndPrivilege", withPwdBody, SecurityPath);
+            }
+            catch (Exception ex2)
+            {
+                throw new InvalidOperationException(
+                    $"两种登录方式都失败：\n  无密码: {firstError?.Message ?? "(无)"}\n  带密码: {ex2.Message}", ex2);
+            }
         }
 
         private async Task<LoggedUser> DoLoginAsync(string method, string innerXml, string asmxPath)
