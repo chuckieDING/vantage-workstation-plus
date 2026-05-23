@@ -88,6 +88,21 @@ namespace VantageWorkstationPlus.Dialogs
                         "然后把分配到的 WorkCellID 填进 appsettings.json 的 WorkCellId 字段。" + hint);
                 }
 
+                // SOAP 预检：调一个不需要用户验证的方法，确认 AuthHeader 通；如果挂了说明工作站密钥有问题
+                try
+                {
+                    lblError.Text = "AuthHeader 预检中…";
+                    var procs = await ts.GetTissueProcessorsAsync();
+                    if (procs.Count == 0)
+                        throw new InvalidOperationException("AuthHeader 通但 GetTissueProcessors 返空，工作站可能没绑定脱水机");
+                }
+                catch (Exception preEx)
+                {
+                    throw new InvalidOperationException(
+                        "SOAP 预检失败（AuthHeader 或 SOAP 连接异常）：" + preEx.Message +
+                        "\n建议：清掉环境变量 {MAC}_NPLA_ENCRYPTION_KEY / _PASSWORD / _WORKCELL_ID / _MACH_ID，重跑 clientsetup.exe 重新注册。", preEx);
+                }
+
                 // SOAP 登录（脱水用）；失败把响应体 dump 出来辅助排查
                 try
                 {
