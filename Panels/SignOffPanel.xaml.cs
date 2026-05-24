@@ -90,6 +90,36 @@ namespace VantageWorkstationPlus.Panels
                 Log(loc == null ? $"未选位置: 加载全部 {paths.Count} 位医生" : $"位置 {loc.LocationNm}: {paths.Count} 位关联医生");
         }
 
+        private void BtnDownloadTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SaveFileDialog
+            {
+                Filter = "Excel|*.xlsx",
+                FileName = $"signoff-template-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx",
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                string locName = (cboLocation.SelectedItem as ComboBoxItem)?.Content as string ?? "";
+                string pathName = (cboPathologist.SelectedItem as ComboBoxItem)?.Content as string ?? "";
+                var cols = new List<ExcelTemplateWriter.Column>
+                {
+                    new("玻片 ID", "00015-2025-01-3-1"),
+                    new("出片位置", locName),
+                    new("病理医生", pathName),
+                    new("备注", ""),
+                };
+                // 当前已加载的玻片清单（如有）预填到模板里
+                var rows = _slides.Select(s => (IReadOnlyList<string>)new[] { s, locName, pathName, "" }).ToList();
+                ExcelTemplateWriter.Write(dlg.FileName, "出片玻片", cols, rows);
+                Log($"模板已导出: {dlg.FileName}（预填 {rows.Count} 个）");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("生成模板失败: " + ex.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void BtnBrowse_Click(object sender, RoutedEventArgs e)
         {
             string? path = BatchPanelBase.PickFile("选择玻片号文件");

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -41,6 +42,33 @@ namespace VantageWorkstationPlus.Panels
             catch (Exception ex)
             {
                 Log("[错误] 初始化流转页面失败: " + ex.Message);
+            }
+        }
+
+        private void BtnDownloadTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SaveFileDialog
+            {
+                Filter = "Excel|*.xlsx",
+                FileName = $"transfer-template-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx",
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                string locName = (cboLocation.SelectedItem as ComboBoxItem)?.Content as string ?? "";
+                var cols = new List<ExcelTemplateWriter.Column>
+                {
+                    new("对象 ID", "00015-2025-3-1"),
+                    new("目标位置", locName),
+                    new("备注", ""),
+                };
+                var rows = _objects.Select(s => (IReadOnlyList<string>)new[] { s, locName, "" }).ToList();
+                ExcelTemplateWriter.Write(dlg.FileName, "流转对象", cols, rows);
+                Log($"模板已导出: {dlg.FileName}（预填 {rows.Count} 个）");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("生成模板失败: " + ex.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
