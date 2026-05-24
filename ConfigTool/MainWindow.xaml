@@ -89,10 +89,13 @@
                             <TextBox x:Name="txtName" Grid.Row="0" Grid.Column="1" Padding="6,4" Margin="0,4" />
 
                             <TextBlock Text="数据库类型" Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Margin="0,4" />
-                            <ComboBox x:Name="cboProvider" Grid.Row="1" Grid.Column="1" Padding="6,4" Margin="0,4">
+                            <ComboBox x:Name="cboProvider" Grid.Row="1" Grid.Column="1" Padding="6,4" Margin="0,4"
+                                      SelectionChanged="CboProvider_SelectionChanged">
                                 <ComboBoxItem Content="SqlServer" />
                                 <ComboBoxItem Content="MySql" />
                                 <ComboBoxItem Content="Postgres" />
+                                <ComboBoxItem Content="Sqlite" />
+                                <ComboBoxItem Content="Oracle" />
                             </ComboBox>
 
                             <TextBlock Text="目标功能 Tab" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="0,4" />
