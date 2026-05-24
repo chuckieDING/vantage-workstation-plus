@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>True</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <RootNamespace>VantageWorkstationPlus.ConfigTool</RootNamespace>
+    <AssemblyName>VantageWorkstationPlus.ConfigTool</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Version>1.0.0</Version>
+    <Product>Histology Workstation Plus - 数据源配置</Product>
+    <Description>主程序的数据源（DB 抽取）独立配置工具</Description>
+  </PropertyGroup>
+
+  <!-- 跟主项目共享的依赖（数据源相关） -->
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.1" />
+    <PackageReference Include="MySqlConnector" Version="2.3.7" />
+    <PackageReference Include="Npgsql" Version="8.0.3" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
+  </ItemGroup>
+
+  <!-- 直接 link 主项目的 DB 服务文件，避免代码复制 / 维护两份 -->
+  <ItemGroup>
+    <Compile Include="..\Services\DbConnectionFactory.cs" Link="Services\DbConnectionFactory.cs" />
+    <Compile Include="..\Services\DbExtractor.cs" Link="Services\DbExtractor.cs" />
+    <Compile Include="..\Services\SecretProtector.cs" Link="Services\SecretProtector.cs" />
+  </ItemGroup>
+</Project>

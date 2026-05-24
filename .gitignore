@@ -27,3 +27,4 @@ publish-fx/*.pdb
 publish-sc/
 *.tar.gz
 *.zip
+publish-configtool/*.pdb

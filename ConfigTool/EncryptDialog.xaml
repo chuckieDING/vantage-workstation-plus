@@ -1,0 +1,40 @@
+<Window x:Class="VantageWorkstationPlus.ConfigTool.EncryptDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DPAPI 加密密码"
+        Width="560" Height="280"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        FontFamily="Segoe UI Variable, Segoe UI, PingFang SC, Microsoft YaHei UI, sans-serif"
+        FontSize="13">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" FontSize="14" FontWeight="SemiBold" Text="DPAPI 加密密码" Margin="0,0,0,8" />
+        <TextBlock Grid.Row="1" TextWrapping="Wrap" Foreground="#5C6470" Margin="0,0,0,12">
+            DPAPI 用当前 Windows 用户的密钥加密，只能在同一台机 + 同一用户下解密。
+            把下面输出的 DPAPI:xxx 整段粘到连接串的 Password= 后面。
+        </TextBlock>
+
+        <TextBlock Grid.Row="2" Text="明文密码" Margin="0,0,0,4" />
+        <PasswordBox Grid.Row="3" x:Name="txtPwd" Padding="6,4" Margin="0,0,0,12"
+                     PasswordChanged="TxtPwd_PasswordChanged" />
+
+        <TextBox Grid.Row="4" x:Name="txtOut" IsReadOnly="True" Padding="6,4"
+                 FontFamily="Cascadia Mono, Consolas" TextWrapping="Wrap" AcceptsReturn="True"
+                 Background="#F4F6F8" />
+
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
+            <Button Content="复制" Padding="14,6" MinWidth="80" Margin="0,0,8,0"
+                    Click="BtnCopy_Click" />
+            <Button Content="关闭" Padding="14,6" MinWidth="80" Click="BtnClose_Click" />
+        </StackPanel>
+    </Grid>
+</Window>
