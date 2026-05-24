@@ -41,6 +41,38 @@ namespace VantageWorkstationPlus.Panels
             }
         }
 
+        private void BtnDownloadTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new SaveFileDialog
+            {
+                Filter = "Excel|*.xlsx",
+                FileName = $"archive-template-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx",
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                var cols = new List<ExcelTemplateWriter.Column>
+                {
+                    new("对象 ID（蜡块/玻片）", "00015-2025-3-1"),
+                    new("类型", "Block"),
+                    new("当前位置", ""),
+                    new("备注", ""),
+                };
+                // 预填 NotArchived 列表（如已加载过）
+                var rows = (_archive?.NotArchived ?? new List<ArtifactRow>())
+                    .Select(r => (IReadOnlyList<string>)new[]
+                    {
+                        r.ArtifactText, r.ArtifactType, r.ArtifactLocation, "",
+                    }).ToList();
+                ExcelTemplateWriter.Write(dlg.FileName, "归档对象", cols, rows);
+                Log($"模板已导出: {dlg.FileName}（预填 {rows.Count} 个未归档对象）");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("生成模板失败: " + ex.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private async void BtnBrowse_Click(object sender, RoutedEventArgs e)
         {
             string? path = BatchPanelBase.PickFile("选择对象编号文件");
