@@ -150,19 +150,31 @@ namespace VantageWorkstationPlus.Services
             return baseUrl;
         }
 
-        /// <summary>取首个非回环、有效的 MAC，规整为大写无分隔符（如 "000C295B83AD"）。
-        /// 与 Ventana 的 Utility.GetMacAddress() 行为一致。</summary>
+        /// <summary>跟 Ventana 原版 Utility.GetMacAddress() 完全一致：所有 Up 网卡取第一个，
+        /// 不过滤类型——否则跟 WPF 选不同的卡，env var 名字就对不上读不到。</summary>
         public static string GetMacAddress()
         {
             var nic = NetworkInterface.GetAllNetworkInterfaces()
-                .Where(n => n.OperationalStatus == OperationalStatus.Up
-                    && n.NetworkInterfaceType != NetworkInterfaceType.Loopback
-                    && n.NetworkInterfaceType != NetworkInterfaceType.Tunnel)
-                .OrderBy(n => n.NetworkInterfaceType == NetworkInterfaceType.Ethernet ? 0 : 1)
+                .Where(n => n.OperationalStatus == OperationalStatus.Up)
                 .FirstOrDefault();
             if (nic == null) throw new InvalidOperationException("找不到可用网卡来获取 MAC");
-            byte[] mac = nic.GetPhysicalAddress().GetAddressBytes();
-            return string.Concat(mac.Select(b => b.ToString("X2")));
+            return nic.GetPhysicalAddress().ToString();  // 默认大写无分隔符
+        }
+
+        /// <summary>列出所有 Up 网卡的 MAC 和检测到的 NPLA env var，用于排查注册状态。</summary>
+        public static string DiagnoseNics()
+        {
+            var sb = new StringBuilder();
+            foreach (var nic in NetworkInterface.GetAllNetworkInterfaces()
+                .Where(n => n.OperationalStatus == OperationalStatus.Up))
+            {
+                string mac = nic.GetPhysicalAddress().ToString();
+                bool hasKey = !string.IsNullOrEmpty(
+                    Environment.GetEnvironmentVariable($"{mac}_NPLA_ENCRYPTION_KEY", EnvironmentVariableTarget.User));
+                sb.AppendLine($"  [{nic.NetworkInterfaceType}] {nic.Name}  MAC={mac}" +
+                    (hasKey ? "  ← 这张卡有 NPLA_ENCRYPTION_KEY env var" : ""));
+            }
+            return sb.ToString();
         }
     }
 

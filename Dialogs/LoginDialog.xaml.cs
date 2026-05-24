@@ -11,7 +11,7 @@ namespace VantageWorkstationPlus.Dialogs
         public LoginDialog()
         {
             InitializeComponent();
-            txtUrl.Text = Properties.Settings.Default.BaseUrl ?? "http://192.168.127.128";
+            txtUrl.Text = App.BaseUrl;
             txtPassword.Focus();
         }
 
@@ -48,10 +48,13 @@ namespace VantageWorkstationPlus.Dialogs
                 {
                     var ans = MessageBox.Show(
                         $"本机（MAC={SoapAuth.GetMacAddress()}）尚未注册为工作站。\n\n" +
-                        "点击「是」立即向服务器注册：\n" +
+                        "检测到的所有 Up 网卡：\n" + SoapAuth.DiagnoseNics() + "\n" +
+                        "如果上面某张卡显示「有 NPLA_ENCRYPTION_KEY env var」但跟我们选的不一致，\n" +
+                        "说明 WPF 注册到了那张卡。请把 WPF 注册的那张卡禁用，或调整网卡启用顺序。\n\n" +
+                        "点击「是」立即向当前 MAC 重新注册：\n" +
                         " 1) SecurityHandshake（写入加密密钥）\n" +
                         " 2) SaveStation（创建 TissueProcessing 工作站实例）\n\n" +
-                        "⚠ 如果本机已安装并在用 WPF 客户端，注册会覆盖原凭据。",
+                        "⚠ 如果本机已在用 WPF 客户端，注册会覆盖原凭据。",
                         "注册工作站", MessageBoxButton.YesNo, MessageBoxImage.Question);
                     if (ans != MessageBoxResult.Yes)
                     {
@@ -132,8 +135,7 @@ namespace VantageWorkstationPlus.Dialogs
                 App.SoapSession = ts;
                 if (ts.LoggedInUser != null) App.EmpUserId = ts.LoggedInUser.Id;
 
-                Properties.Settings.Default.BaseUrl = url;
-                Properties.Settings.Default.Save();
+                App.BaseUrl = url;  // 内存里记一下，本次会话用；持久化靠 appsettings.json
 
                 var main = new MainWindow();
                 Application.Current.MainWindow = main;

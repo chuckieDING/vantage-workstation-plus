@@ -27,6 +27,9 @@ namespace VantageWorkstationPlus
         /// <summary>true 表示接受任意 TLS 证书（自签 / 内网常用）；false 启用严格校验。</summary>
         public static bool AcceptAnyServerCert { get; set; } = true;
 
+        /// <summary>服务器地址（含 http:// 前缀）。从 appsettings 读，登录页可改但不持久化。</summary>
+        public static string BaseUrl { get; set; } = "http://192.168.127.128";
+
         public App()
         {
             // 进程级异常都落到 ./logs/yyyy-MM-dd.log
@@ -80,6 +83,7 @@ namespace VantageWorkstationPlus
             ClientVersion = jo.Value<string>("ClientVersion") ?? ClientVersion;
 
             AcceptAnyServerCert = jo.Value<bool?>("AcceptAnyServerCert") ?? AcceptAnyServerCert;
+            BaseUrl = jo.Value<string>("BaseUrl") ?? BaseUrl;
 
             if (jo["EnabledTabs"] is JArray tabs)
             {
