@@ -3,6 +3,7 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 
 namespace VantageWorkstationPlus.Services
@@ -148,6 +149,19 @@ namespace VantageWorkstationPlus.Services
         {
             if (Uri.TryCreate(baseUrl, UriKind.Absolute, out var u)) return u.Host;
             return baseUrl;
+        }
+
+        /// <summary>读 clientsetup.exe 写到注册表的 MachineID（与原版 Utility.GetMachineID 一致）。
+        /// 位置：HKLM\SOFTWARE\Ventana\VANTAGE\MachineID（GUID 前 25 字符）。返回 null 表示未注册。</summary>
+        public static string? GetMachineIdFromRegistry()
+        {
+            try
+            {
+                using var key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Ventana\VANTAGE");
+                var v = key?.GetValue("MachineID")?.ToString()?.Trim();
+                return string.IsNullOrEmpty(v) ? null : v;
+            }
+            catch { return null; }
         }
 
         /// <summary>跟 Ventana 原版 Utility.GetMacAddress() 完全一致：所有 Up 网卡取第一个，

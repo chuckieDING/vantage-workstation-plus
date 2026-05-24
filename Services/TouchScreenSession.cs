@@ -202,6 +202,26 @@ namespace VantageWorkstationPlus.Services
 
         // ============== Tissue Processing 主流程 ==============
 
+        /// <summary>原版 WPF 启动时调的接口：传机器 ID 拿全部工作站配置（含 WorkCellID、
+        /// PasswordRequired 等）。我们用来从注册表 MachineID 自动拿到 WorkCellID，无需用户填配置。</summary>
+        public async Task<WorkstationConfig?> GetWorkstationConfigInfoAsync(string machineId)
+        {
+            var resp = await PostSoapAsync(TouchScreenPath, "GetWorkstationConfigInfo",
+                $"<MacAddress>{Esc(machineId)}</MacAddress>");
+            var r = resp.Element(TempNs + "GetWorkstationConfigInfoResult");
+            if (r == null) return null;
+            var wcInfo = r.Element(TempNs + "WorkCellInfo");
+            var wInfo = r.Element(TempNs + "WorkstationInfo");
+            return new WorkstationConfig
+            {
+                WorkCellID = ParseInt(wcInfo?.Element(TempNs + "WorkCellID")?.Value),
+                WorkcellName = wcInfo?.Element(TempNs + "WorkcellName")?.Value?.Trim() ?? "",
+                WorkCellTypeID = ParseInt(wcInfo?.Element(TempNs + "WorkcellTypeID")?.Value),
+                PasswordRequired = ParseBool(wInfo?.Element(TempNs + "PasswordRequired")?.Value),
+                Exists = ParseBool(r.Element(TempNs + "Exists")?.Value),
+            };
+        }
+
         public async Task<List<TissueProcessor>> GetTissueProcessorsAsync()
         {
             var resp = await PostSoapAsync(TouchScreenPath, "GetTissueProcessors", "");
@@ -568,6 +588,16 @@ namespace VantageWorkstationPlus.Services
         public string Grosser = "";
         public override string ToString() =>
             string.IsNullOrEmpty(HumanReadableId) ? Id.ToString() : HumanReadableId;
+    }
+
+    /// <summary>从 SOAP GetWorkstationConfigInfo 拿到的工作站完整配置。</summary>
+    public class WorkstationConfig
+    {
+        public int WorkCellID;
+        public string WorkcellName = "";
+        public int WorkCellTypeID;
+        public bool PasswordRequired;
+        public bool Exists;
     }
 
     public class WorkCell

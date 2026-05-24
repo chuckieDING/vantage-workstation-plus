@@ -76,7 +76,31 @@ namespace VantageWorkstationPlus.Dialogs
                 }
                 if (App.WorkCellId <= 0)
                 {
-                    // 拉一遍 WorkCells 列表给提示
+                    // 仿原版 WPF：读注册表 HKLM\SOFTWARE\Ventana\VANTAGE\MachineID
+                    // → SOAP GetWorkstationConfigInfo(machid) → 拿 WorkCellID，无需用户手填
+                    string? machId = SoapAuth.GetMachineIdFromRegistry();
+                    if (!string.IsNullOrEmpty(machId))
+                    {
+                        try
+                        {
+                            lblError.Text = $"从注册表读 MachineID={machId}，向服务器查 WorkCellID…";
+                            var cfg = await ts.GetWorkstationConfigInfoAsync(machId);
+                            if (cfg != null && cfg.WorkCellID > 0)
+                            {
+                                App.WorkCellId = cfg.WorkCellID;
+                                SoapAuth.SaveWorkCellId(cfg.WorkCellID);
+                                lblError.Text = $"自动取到 WorkCellID={cfg.WorkCellID} ({cfg.WorkcellName})";
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            // 不致命，继续走下面的报错提示
+                            AppLog.Warn("GetWorkstationConfigInfo failed: " + ex.Message);
+                        }
+                    }
+                }
+                if (App.WorkCellId <= 0)
+                {
                     string hint = "";
                     try
                     {
@@ -88,9 +112,9 @@ namespace VantageWorkstationPlus.Dialogs
                     }
                     catch { }
                     throw new InvalidOperationException(
-                        "appsettings.json 里的 WorkCellId 仍是默认值或未配置。\n" +
-                        "请先在虚机上跑原版 clientsetup.exe 注册工作站，\n" +
-                        "然后把分配到的 WorkCellID 填进 appsettings.json 的 WorkCellId 字段。" + hint);
+                        "未能自动取到 WorkCellID：注册表无 MachineID（clientsetup.exe 未跑过）" +
+                        "且 appsettings.json / 环境变量都没配。\n\n" +
+                        "请先在虚机跑原版 clientsetup.exe 注册工作站，或手动把 WorkCellID 填到 appsettings.json。" + hint);
                 }
 
                 // SOAP 预检：调一个不需要用户验证的方法，确认 AuthHeader 通；如果挂了说明工作站密钥有问题
