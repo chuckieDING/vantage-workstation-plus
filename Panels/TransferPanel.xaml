@@ -8,8 +8,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="批量流转" Style="{StaticResource T.H1}" />
-            <TextBlock Text="Specimen Tracking — 把对象批量流转到指定位置" Style="{StaticResource T.Caption}" Margin="0,4,0,0" />
+            <TextBlock Text="流转 (Tracking)" Style="{StaticResource T.H1}" />
+            <TextBlock Text="把对象批量流转到指定位置" Style="{StaticResource T.Caption}" Margin="0,4,0,0" />
         </StackPanel>
 
         <Border Grid.Row="1" Style="{StaticResource Card}">
@@ -68,7 +68,7 @@
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="预演 (Dry-Run)" Style="{StaticResource Btn.Secondary}"
                             Click="BtnDry_Click" Margin="0,0,8,0" />
-                    <Button Grid.Column="1" x:Name="btnRun" Content="开始批量流转"
+                    <Button Grid.Column="1" x:Name="btnRun" Content="开始流转"
                             Style="{StaticResource Btn.Primary}" Click="BtnRun_Click"
                             Margin="0,0,12,0" MinWidth="140" />
                     <ProgressBar Grid.Column="2" x:Name="progress" Minimum="0" Value="0" VerticalAlignment="Center" />

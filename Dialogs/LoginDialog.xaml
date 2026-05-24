@@ -43,11 +43,14 @@
                     <TextBlock Text="Histology Workstation Plus 批量工作站"
                                Style="{StaticResource T.Caption}" Margin="0,0,0,28" />
 
-                    <TextBlock Text="服务器" Style="{StaticResource T.Label}" Margin="0,0,0,6" />
-                    <TextBox x:Name="txtUrl" Text="http://192.168.127.128" Margin="0,0,0,18" />
+                    <!-- 服务器地址改在 appsettings.json / 设置对话框中配置，登录页不再显示 -->
+                    <TextBox x:Name="txtUrl" Visibility="Collapsed" />
 
                     <TextBlock Text="用户名" Style="{StaticResource T.Label}" Margin="0,0,0,6" />
                     <TextBox x:Name="txtUsername" Text="adminuser" MaxLength="25" Margin="0,0,0,18" />
+
+                    <TextBlock x:Name="lblServerInfo" Style="{StaticResource T.Caption}"
+                               Margin="0,0,0,12" Foreground="{StaticResource B.TextTertiary}" />
 
                     <TextBlock Text="密码" Style="{StaticResource T.Label}" Margin="0,0,0,6" />
                     <PasswordBox x:Name="txtPassword" Margin="0,0,0,12" />

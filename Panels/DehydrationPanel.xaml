@@ -8,8 +8,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="批量脱水" Style="{StaticResource T.H1}" />
-            <TextBlock Text="Tissue Processing — 选择脱水机/缸/框，导入包埋盒后启动脱水"
+            <TextBlock Text="脱水 (Tissue Processing)" Style="{StaticResource T.H1}" />
+            <TextBlock Text="选择脱水机/缸/框，导入包埋盒后启动脱水"
                        Style="{StaticResource T.Caption}" Margin="0,4,0,0" />
         </StackPanel>
 

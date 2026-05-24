@@ -28,3 +28,7 @@ publish-sc/
 *.tar.gz
 *.zip
 publish-configtool/*.pdb
+
+# self-contained 版（含 .NET runtime）太大走 GitHub Release，不进 git
+publish-sc/
+publish-configtool-sc/

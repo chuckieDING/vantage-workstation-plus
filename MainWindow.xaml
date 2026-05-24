@@ -74,16 +74,16 @@
                      ItemContainerStyle="{StaticResource Sidebar.Item}"
                      SelectionChanged="LstMenu_SelectionChanged">
                 <ListBoxItem Tag="signoff">
-                    <TextBlock Text="批量出片" />
+                    <TextBlock Text="出片 (Assembling)" />
                 </ListBoxItem>
                 <ListBoxItem Tag="dehydration">
-                    <TextBlock Text="批量脱水" />
+                    <TextBlock Text="脱水 (Tissue Processing)" />
                 </ListBoxItem>
                 <ListBoxItem Tag="archive">
-                    <TextBlock Text="批量归档" />
+                    <TextBlock Text="归档 (Archiving)" />
                 </ListBoxItem>
                 <ListBoxItem Tag="transfer">
-                    <TextBlock Text="批量流转" />
+                    <TextBlock Text="流转 (Tracking)" />
                 </ListBoxItem>
             </ListBox>
 
