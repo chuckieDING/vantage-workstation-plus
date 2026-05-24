@@ -73,8 +73,13 @@
                     <TextBlock Grid.Column="0" Text="包埋盒文件" Style="{StaticResource T.Label}" />
                     <TextBox Grid.Column="1" x:Name="txtFile" IsReadOnly="True" Margin="0,0,12,0"
                              HorizontalScrollBarVisibility="Auto" />
-                    <Button Grid.Column="2" Content="选择..." Style="{StaticResource Btn.Secondary}"
-                            Click="BtnBrowse_Click" />
+                    <StackPanel Grid.Column="2" Orientation="Horizontal">
+                        <Button Content="下载模板" Style="{StaticResource Btn.Secondary}"
+                                ToolTip="按当前篮内蜡块生成 xlsx 模板"
+                                Click="BtnDownloadTemplate_Click" Margin="0,0,6,0" />
+                        <Button Content="选择..." Style="{StaticResource Btn.Secondary}"
+                                Click="BtnBrowse_Click" />
+                    </StackPanel>
                 </Grid>
 
                 <!-- 包埋盒预览 -->
@@ -100,6 +105,10 @@
                             <Button x:Name="btnClearBasket" Content="清空脱水框"
                                     Style="{StaticResource Btn.Secondary}" MinWidth="90"
                                     Click="BtnClearBasket_Click" />
+                            <Button x:Name="btnExportFailures" Content="导出失败" IsEnabled="False"
+                                    Style="{StaticResource Btn.Secondary}" MinWidth="70" Margin="6,0,0,0"
+                                    ToolTip="导出上次批量的失败明细到 Excel"
+                                    Click="BtnExportFailures_Click" />
                         </StackPanel>
                     </Grid>
                     <Border Grid.Row="1" BorderBrush="{StaticResource B.Border}" BorderThickness="1" CornerRadius="6"
