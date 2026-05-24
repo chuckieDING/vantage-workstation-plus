@@ -118,6 +118,17 @@ namespace VantageWorkstationPlus
                 if (set.Count > 0) EnabledTabs = set;
             }
 
+            // 自动从环境变量补 WorkCellId（appsettings 没配或为 0 时）
+            if (WorkCellId <= 0)
+            {
+                int? envWc = SoapAuth.GetSavedWorkCellId();
+                if (envWc != null && envWc.Value > 0)
+                {
+                    WorkCellId = envWc.Value;
+                    AppLog.Info($"WorkCellId 未在 appsettings 配置，从环境变量自动取到 {WorkCellId}");
+                }
+            }
+
             AppLog.Info($"Loaded settings: WorkCellId={WorkCellId}, EmpUserId={EmpUserId}, " +
                 $"WorkCellType={WorkCellType}, ClientVersion={ClientVersion}, " +
                 $"EnabledTabs={(EnabledTabs == null ? "(all)" : string.Join(",", EnabledTabs))}");

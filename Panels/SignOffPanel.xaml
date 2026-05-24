@@ -8,7 +8,7 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="批量出片" Style="{StaticResource T.H1}" />
+            <TextBlock Text="出片 (Assembling)" Style="{StaticResource T.H1}" />
             <TextBlock Text="读入玻片清单文件，按位置和病理医生批量签出" Style="{StaticResource T.Caption}" Margin="0,4,0,0" />
         </StackPanel>
 
@@ -70,7 +70,7 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" x:Name="btnRun" Content="开始批量出片"
+                    <Button Grid.Column="0" x:Name="btnRun" Content="开始出片"
                             Style="{StaticResource Btn.Primary}" Click="BtnRun_Click"
                             Margin="0,0,12,0" MinWidth="140" />
                     <ProgressBar Grid.Column="1" x:Name="progress" Minimum="0" Value="0"

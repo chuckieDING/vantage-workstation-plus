@@ -12,6 +12,8 @@ namespace VantageWorkstationPlus.Dialogs
         {
             InitializeComponent();
             txtUrl.Text = App.BaseUrl;
+            lblServerInfo.Text = $"服务器: {App.BaseUrl}  ·  工作站 ID: " +
+                (App.WorkCellId > 0 ? App.WorkCellId.ToString() : "未配置");
             txtPassword.Focus();
         }
 
