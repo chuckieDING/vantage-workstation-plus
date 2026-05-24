@@ -30,6 +30,12 @@ namespace VantageWorkstationPlus
         /// <summary>服务器地址（含 http:// 前缀）。从 appsettings 读，登录页可改但不持久化。</summary>
         public static string BaseUrl { get; set; } = "http://192.168.127.128";
 
+        /// <summary>从 appsettings.json 加载的数据源配置（PR3 DB 抽取用）。</summary>
+        public static List<Services.DbDataSource> DataSources { get; set; } = new();
+
+        /// <summary>调度器实例，启动时初始化，关闭时 Dispose。</summary>
+        public static Services.DbScheduler? Scheduler { get; set; }
+
         public App()
         {
             // 进程级异常都落到 ./logs/yyyy-MM-dd.log
@@ -84,6 +90,21 @@ namespace VantageWorkstationPlus
 
             AcceptAnyServerCert = jo.Value<bool?>("AcceptAnyServerCert") ?? AcceptAnyServerCert;
             BaseUrl = jo.Value<string>("BaseUrl") ?? BaseUrl;
+
+            // DataSources（PR3）
+            if (jo["DataSources"] is JArray dsArr)
+            {
+                foreach (var dsTok in dsArr)
+                {
+                    try
+                    {
+                        var ds = dsTok.ToObject<Services.DbDataSource>();
+                        if (ds != null) DataSources.Add(ds);
+                    }
+                    catch (Exception ex) { AppLog.Warn("DataSource 解析失败: " + ex.Message); }
+                }
+                AppLog.Info($"已加载 {DataSources.Count} 个数据源");
+            }
 
             if (jo["EnabledTabs"] is JArray tabs)
             {
