@@ -65,6 +65,10 @@ namespace VantageWorkstationPlus
             AppLog.Info($"BaseDirectory: {AppContext.BaseDirectory}");
             AppLog.Info($"OS: {Environment.OSVersion}, .NET: {Environment.Version}");
 
+            // 让 DbExtractor 的 {user} 占位符用我们登录的用户
+            DbExtractor.CurrentUserProvider = () =>
+                SoapSession?.LoggedInUser?.UserName ?? Session?.Username ?? "";
+
             try { LoadSettings(); }
             catch (Exception ex)
             {

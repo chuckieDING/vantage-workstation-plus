@@ -91,11 +91,14 @@ namespace VantageWorkstationPlus.Services
             return string.Join(";", parts);
         }
 
+        /// <summary>主程序登录后可设置：() =&gt; App.SoapSession?.LoggedInUser?.UserName。
+        /// 未设置时回退到 Environment.UserName，方便 ConfigTool 等无登录态的进程复用。</summary>
+        public static Func<string>? CurrentUserProvider { get; set; }
+
         private static string SubstitutePlaceholders(string sql) => sql
             .Replace("{date}", DateTime.Today.ToString("yyyy-MM-dd"))
             .Replace("{today}", DateTime.Today.ToString("yyyy-MM-dd"))
             .Replace("{now}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
-            .Replace("{user}", App.SoapSession?.LoggedInUser?.UserName
-                ?? App.Session?.Username ?? "");
+            .Replace("{user}", CurrentUserProvider?.Invoke() ?? Environment.UserName);
     }
 }
