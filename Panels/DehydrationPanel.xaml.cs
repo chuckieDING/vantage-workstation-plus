@@ -355,6 +355,40 @@ namespace VantageWorkstationPlus.Panels
             lblPreview.Text = s;
         }
 
+        private void BtnDownloadTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Excel|*.xlsx",
+                FileName = $"dehydration-template-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx",
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                var cols = new List<ExcelTemplateWriter.Column>
+                {
+                    new("包埋盒 ID", "00015-2025-3-1"),
+                    new("当前位置", _currentBasket?.DisplayId ?? ""),
+                    new("组织类型", "—"),
+                    new("备注", ""),
+                };
+                // 预填当前篮内蜡块（便于用户对照），第一列就是 ID
+                var rows = _basketItems.Select(w => (IReadOnlyList<string>)new[]
+                {
+                    string.IsNullOrEmpty(w.CassetteId) ? w.BlockId.ToString() : w.CassetteId,
+                    _currentBasket?.DisplayId ?? "",
+                    w.TissueName,
+                    "",
+                }).ToList();
+                ExcelTemplateWriter.Write(dlg.FileName, "脱水包埋盒", cols, rows);
+                Log($"模板已导出: {dlg.FileName}（预填 {rows.Count} 个）");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("生成模板失败: " + ex.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void BtnBrowse_Click(object sender, RoutedEventArgs e)
         {
             string? path = BatchPanelBase.PickFile("选择包埋盒编号文件");

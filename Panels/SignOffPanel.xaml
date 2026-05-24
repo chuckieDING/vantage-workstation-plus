@@ -38,8 +38,13 @@
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="文件" Style="{StaticResource T.Label}" Margin="0,8" />
                     <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtFile" IsReadOnly="True" Margin="0,6,12,6"
                              HorizontalScrollBarVisibility="Auto" />
-                    <Button Grid.Row="0" Grid.Column="2" Content="选择..." Style="{StaticResource Btn.Secondary}"
-                            Click="BtnBrowse_Click" Margin="0,6" />
+                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Margin="0,6">
+                        <Button Content="下载模板" Style="{StaticResource Btn.Secondary}"
+                                ToolTip="按当前位置和医生生成 xlsx 模板"
+                                Click="BtnDownloadTemplate_Click" Margin="0,0,6,0" />
+                        <Button Content="选择..." Style="{StaticResource Btn.Secondary}"
+                                Click="BtnBrowse_Click" />
+                    </StackPanel>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Text="出片位置" Style="{StaticResource T.Label}" Margin="0,8" />
                     <ComboBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" x:Name="cboLocation"
