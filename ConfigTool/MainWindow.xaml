@@ -100,10 +100,10 @@
 
                             <TextBlock Text="目标功能 Tab" Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Margin="0,4" />
                             <ComboBox x:Name="cboTargetPanel" Grid.Row="2" Grid.Column="1" Padding="6,4" Margin="0,4">
-                                <ComboBoxItem Content="signoff" />
-                                <ComboBoxItem Content="dehydration" />
-                                <ComboBoxItem Content="archive" />
-                                <ComboBoxItem Content="transfer" />
+                                <ComboBoxItem Tag="signoff" Content="出片 (Assembling)" />
+                                <ComboBoxItem Tag="dehydration" Content="脱水 (Tissue Processing)" />
+                                <ComboBoxItem Tag="archive" Content="归档 (Archiving)" />
+                                <ComboBoxItem Tag="transfer" Content="流转 (Tracking)" />
                             </ComboBox>
 
                             <TextBlock Text="定时间隔" Grid.Row="3" Grid.Column="0" VerticalAlignment="Center" Margin="0,4" />

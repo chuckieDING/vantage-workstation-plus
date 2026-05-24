@@ -127,7 +127,7 @@ namespace VantageWorkstationPlus.ConfigTool
                 txtCron.Text = _current.CronOrInterval ?? "";
                 cboProvider.SelectedIndex = (int)_current.Provider;
                 cboTargetPanel.SelectedItem = cboTargetPanel.Items.OfType<ComboBoxItem>()
-                    .FirstOrDefault(i => (string)i.Content == _current.TargetPanel);
+                    .FirstOrDefault(i => (string?)i.Tag == _current.TargetPanel);
                 lblLastRun.Text = string.IsNullOrEmpty(_current.LastRun) ? "—" : _current.LastRun;
             }
             finally { _suppressUiSync = false; }
@@ -147,8 +147,8 @@ namespace VantageWorkstationPlus.ConfigTool
             if (cboProvider.SelectedItem is ComboBoxItem pi
                 && Enum.TryParse<DbProvider>((string)pi.Content, out var prov))
                 _current.Provider = prov;
-            if (cboTargetPanel.SelectedItem is ComboBoxItem ti)
-                _current.TargetPanel = (string)ti.Content;
+            if (cboTargetPanel.SelectedItem is ComboBoxItem ti && ti.Tag is string tag)
+                _current.TargetPanel = tag;
         }
 
         /// <summary>切换 provider 时，如果连接串为空或仍是别的 provider 的示例，自动填该 provider 的示例。</summary>
