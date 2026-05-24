@@ -15,8 +15,22 @@ namespace VantageWorkstationPlus
         private readonly TransferPanel _transfer = new();
         private bool _confirmedExit;
 
+        public RelayCommand SwitchTab1 { get; }
+        public RelayCommand SwitchTab2 { get; }
+        public RelayCommand SwitchTab3 { get; }
+        public RelayCommand SwitchTab4 { get; }
+        public RelayCommand OpenSettings { get; }
+        public RelayCommand ShowHelp { get; }
+
         public MainWindow()
         {
+            SwitchTab1 = new RelayCommand(() => SelectTabByIndex(0));
+            SwitchTab2 = new RelayCommand(() => SelectTabByIndex(1));
+            SwitchTab3 = new RelayCommand(() => SelectTabByIndex(2));
+            SwitchTab4 = new RelayCommand(() => SelectTabByIndex(3));
+            OpenSettings = new RelayCommand(OpenSettingsDialog);
+            ShowHelp = new RelayCommand(ShowHelpDialog);
+
             InitializeComponent();
             Loaded += (_, _) =>
             {
@@ -44,8 +58,54 @@ namespace VantageWorkstationPlus
             };
         }
 
+        /// <summary>按"可见 Tab 列表里的索引"选中（Ctrl+1..4 用），跳过隐藏的。</summary>
+        private void SelectTabByIndex(int visibleIndex)
+        {
+            int seen = -1;
+            for (int i = 0; i < lstMenu.Items.Count; i++)
+            {
+                if (lstMenu.Items[i] is ListBoxItem li && li.Visibility == Visibility.Visible)
+                {
+                    seen++;
+                    if (seen == visibleIndex) { lstMenu.SelectedIndex = i; return; }
+                }
+            }
+        }
+
+        private void OpenSettingsDialog()
+        {
+            var dlg = new Dialogs.SettingsDialog { Owner = this };
+            if (dlg.ShowDialog() == true)
+            {
+                MessageBox.Show("设置已保存。重启程序生效。", "保存成功",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void ShowHelpDialog()
+        {
+            MessageBox.Show(
+                "Histology Workstation Plus — 批量工作站\n\n" +
+                "快捷键：\n" +
+                "  Ctrl+1..4    切换到对应 Tab\n" +
+                "  Ctrl+,       打开设置\n" +
+                "  F1           显示本帮助\n\n" +
+                "使用步骤：\n" +
+                "  1. 登录服务器 + 用户名 + 密码\n" +
+                "  2. 在左侧选功能 Tab\n" +
+                "  3. 选好参数后点「下载模板」生成 xlsx 模板\n" +
+                "  4. 编辑模板填好要操作的 ID\n" +
+                "  5. 点「选择...」上传文件，再点开始批量\n\n" +
+                "配置：右上「设置」按钮可改 BaseUrl / WorkCellId 等。\n" +
+                "日志：./logs/{date}.log 自动落盘。",
+                "帮助", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
         private void BtnMinimize_Click(object sender, RoutedEventArgs e) =>
             WindowState = WindowState.Minimized;
+
+        private void BtnSettings_Click(object sender, RoutedEventArgs e) => OpenSettingsDialog();
+        private void BtnHelp_Click(object sender, RoutedEventArgs e) => ShowHelpDialog();
 
         private void Title_DragWindow(object sender, MouseButtonEventArgs e)
         {
@@ -95,5 +155,15 @@ namespace VantageWorkstationPlus
             _confirmedExit = true;
             Application.Current.Shutdown();
         }
+    }
+
+    /// <summary>WPF KeyBinding 用的最简 RelayCommand。</summary>
+    public class RelayCommand : ICommand
+    {
+        private readonly System.Action _exec;
+        public RelayCommand(System.Action exec) => _exec = exec;
+        public bool CanExecute(object? parameter) => true;
+        public void Execute(object? parameter) => _exec();
+        public event System.EventHandler? CanExecuteChanged { add { } remove { } }
     }
 }

@@ -9,6 +9,14 @@
         FontFamily="{StaticResource F.Default}"
         MinWidth="1100" MinHeight="720"
         Closing="Window_Closing">
+    <Window.InputBindings>
+        <KeyBinding Modifiers="Ctrl" Key="D1" Command="{Binding SwitchTab1, RelativeSource={RelativeSource AncestorType=Window}}" />
+        <KeyBinding Modifiers="Ctrl" Key="D2" Command="{Binding SwitchTab2, RelativeSource={RelativeSource AncestorType=Window}}" />
+        <KeyBinding Modifiers="Ctrl" Key="D3" Command="{Binding SwitchTab3, RelativeSource={RelativeSource AncestorType=Window}}" />
+        <KeyBinding Modifiers="Ctrl" Key="D4" Command="{Binding SwitchTab4, RelativeSource={RelativeSource AncestorType=Window}}" />
+        <KeyBinding Modifiers="Ctrl" Key="OemComma" Command="{Binding OpenSettings, RelativeSource={RelativeSource AncestorType=Window}}" />
+        <KeyBinding Key="F1" Command="{Binding ShowHelp, RelativeSource={RelativeSource AncestorType=Window}}" />
+    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -33,8 +41,15 @@
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
                 <TextBlock x:Name="lblWelcome" VerticalAlignment="Center"
                            Style="{StaticResource T.Caption}" Margin="0,0,16,0" />
+                <Button x:Name="btnSettings" Content="设置" ToolTip="设置 (Ctrl+,)"
+                        Style="{StaticResource Btn.Secondary}" Margin="0,0,6,0"
+                        Click="BtnSettings_Click" />
+                <Button x:Name="btnHelp" Content="?" ToolTip="帮助 (F1)"
+                        Style="{StaticResource Btn.Secondary}" MinWidth="36" Margin="0,0,6,0"
+                        Click="BtnHelp_Click" />
                 <Button x:Name="btnLogout" Content="切换账号"
                         Style="{StaticResource Btn.Secondary}"
+                        ToolTip="切换账号"
                         Click="BtnLogout_Click" />
             </StackPanel>
             <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
