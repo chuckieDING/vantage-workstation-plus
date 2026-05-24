@@ -151,6 +151,19 @@ namespace VantageWorkstationPlus.ConfigTool
                 _current.TargetPanel = (string)ti.Content;
         }
 
+        /// <summary>切换 provider 时，如果连接串为空或仍是别的 provider 的示例，自动填该 provider 的示例。</summary>
+        private void CboProvider_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_suppressUiSync || _current == null) return;
+            if (cboProvider.SelectedItem is not ComboBoxItem item) return;
+            if (!Enum.TryParse<DbProvider>((string)item.Content, out var prov)) return;
+            string cur = txtConnStr.Text.Trim();
+            // 只在为空或仍是已知示例时替换，避免覆盖用户已填的串
+            bool isExample = string.IsNullOrEmpty(cur)
+                || Enum.GetValues<DbProvider>().Any(p => cur == DbConnectionFactory.ExampleConnectionString(p));
+            if (isExample) txtConnStr.Text = DbConnectionFactory.ExampleConnectionString(prov);
+        }
+
         private void BtnTest_Click(object sender, RoutedEventArgs e)
         {
             CommitDetailToCurrent();
