@@ -441,54 +441,140 @@ namespace VantageWorkstationPlus.Panels
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e) => _batchCts?.Cancel();
 
-        /// <summary>把 _objects 里的所有蜡块加到当前篮（GetArtifact + AssignCassetteToBasket）。返回 (成功数, 失败数)。</summary>
-        private async Task<(int Ok, int Fail)> AddCassettesToBasketAsync()
+        /// <summary>把 _objects 里的所有蜡块加到当前篮：单条请求带指数退避重试，整体走 BatchCheckpoint
+        /// 断点续传，失败明细攒到 _lastFailures 供后续导出。</summary>
+        private async Task<(int Ok, int Fail)> AddCassettesToBasketAsync(BatchCheckpoint? resumeCp = null)
         {
             int basketId = _currentBasket!.BasketId;
+            var pending = (resumeCp == null ? _objects : resumeCp.PendingItems.ToList());
+            var checkpoint = resumeCp ?? BatchCheckpoint.Create(
+                "dehydration-add",
+                $"BasketId={basketId}, {_objects.Count} items",
+                _objects);
+
             progress.Maximum = _objects.Count;
-            progress.Value = 0;
-            int ok = 0, fail = 0;
+            progress.Value = checkpoint.CompletedItems.Count + checkpoint.FailedItems.Count;
+            _lastFailures.Clear();
+            int ok = checkpoint.CompletedItems.Count, fail = checkpoint.FailedItems.Count;
             _batchCts = new System.Threading.CancellationTokenSource();
             btnCancel.IsEnabled = true;
             var ct = _batchCts.Token;
-            Log($"向 BasketId={basketId} 添加 {_objects.Count} 个包埋盒...");
-            foreach (var sid in _objects)
+            Log($"向 BasketId={basketId} 添加 {pending.Count()} 个包埋盒（已完成 {ok}，失败 {fail}）...");
+
+            foreach (var sid in pending.ToList())
             {
-                if (ct.IsCancellationRequested) { Log("[中止] 用户取消"); break; }
+                if (ct.IsCancellationRequested) { Log("[中止] 用户取消，checkpoint 已保留"); break; }
                 try
                 {
-                    var art = await _ts!.GetArtifactAsync(sid, App.WorkCellId, App.EmpUserId);
+                    var art = await RetryPolicy.ExecuteAsync(
+                        () => _ts!.GetArtifactAsync(sid, App.WorkCellId, App.EmpUserId),
+                        ct: ct,
+                        onRetry: (n, ex) => Log($"  ⟳ {sid}: 第{n}次重试 ({RetryPolicy.CategoryIcon(RetryPolicy.Classify(ex))} {ex.Message})"));
                     if (art == null || art.BlockId == 0)
                     {
-                        Log($"  FAIL {sid}: 未找到");
+                        Log($"  📋 FAIL {sid}: 未找到");
                         fail++;
+                        checkpoint.MarkFailed(sid);
+                        _lastFailures.Add(new FailureReport.FailedItem(sid, "Business", "未找到"));
                     }
                     else if (art.IsCanceled)
                     {
-                        Log($"  SKIP {sid}: 已取消");
+                        Log($"  📋 SKIP {sid}: 已取消");
                         fail++;
+                        checkpoint.MarkFailed(sid);
+                        _lastFailures.Add(new FailureReport.FailedItem(sid, "Business", "已取消的物品"));
                     }
                     else
                     {
-                        await _ts.AssignCassetteToBasketAsync(art.BlockId, basketId,
-                            App.WorkCellId, App.EmpUserId);
-                        Log($"  OK   {sid} (BlockId={art.BlockId})");
+                        await RetryPolicy.ExecuteAsync(
+                            () => _ts!.AssignCassetteToBasketAsync(art.BlockId, basketId, App.WorkCellId, App.EmpUserId),
+                            ct: ct);
+                        Log($"  ✓ OK   {sid} (BlockId={art.BlockId})");
                         ok++;
+                        checkpoint.MarkSuccess(sid);
                     }
                 }
                 catch (Exception ex)
                 {
-                    Log($"  FAIL {sid}: {ex.Message}");
+                    var cat = RetryPolicy.Classify(ex);
+                    Log($"  {RetryPolicy.CategoryIcon(cat)} FAIL {sid}: {ex.Message}");
                     fail++;
+                    checkpoint.MarkFailed(sid);
+                    _lastFailures.Add(new FailureReport.FailedItem(sid, cat.ToString(), ex.Message));
+                    if (cat == RetryPolicy.ErrorCategory.Auth || cat == RetryPolicy.ErrorCategory.Fatal)
+                    {
+                        Log($"  💥 检测到 {cat} 错误，中止整批");
+                        break;
+                    }
                 }
                 progress.Value++;
             }
-            Log($"添加完成: 成功 {ok} 个, 失败 {fail} 个");
+
+            if (checkpoint.IsFinished)
+            {
+                checkpoint.Complete();
+                Log($"添加完成: 成功 {ok} 个, 失败 {fail} 个（checkpoint 已清理）");
+            }
+            else
+            {
+                Log($"添加中断: 成功 {ok} 个, 失败 {fail} 个, 剩余 {checkpoint.PendingItems.Count()} 个（checkpoint 保留）");
+            }
+
+            if (fail > 0)
+                btnExportFailures.IsEnabled = true;
+
             btnCancel.IsEnabled = false;
             _batchCts = null;
             progress.Value = 0;
             await RefreshBasketItemsAsync();
             return (ok, fail);
+        }
+
+        private readonly List<FailureReport.FailedItem> _lastFailures = new();
+
+        private void BtnExportFailures_Click(object sender, RoutedEventArgs e)
+        {
+            if (_lastFailures.Count == 0)
+            {
+                MessageBox.Show("当前没有失败明细可导出", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            var dlg = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Excel|*.xlsx",
+                FileName = $"failed-{DateTime.Now:yyyyMMdd-HHmmss}.xlsx",
+            };
+            if (dlg.ShowDialog() != true) return;
+            try
+            {
+                FailureReport.WriteXlsx(dlg.FileName, _lastFailures);
+                Log($"失败明细已导出: {dlg.FileName}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("导出失败: " + ex.Message, "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>启动时检查未完成 checkpoint，问用户是否续传。</summary>
+        private async Task<bool> CheckResumeAsync()
+        {
+            var pending = BatchCheckpoint.ListPending("dehydration-add");
+            if (pending.Count == 0) return false;
+            var cp = pending.First();
+            var ans = MessageBox.Show(
+                $"检测到上次未完成的批次：\n  {cp.Description}\n  开始时间: {cp.StartedAt:yyyy-MM-dd HH:mm}\n" +
+                $"  剩余 {cp.PendingItems.Count()} 个未处理\n\n是否继续？\n(选「否」会丢弃 checkpoint)",
+                "断点续传", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+            if (ans == MessageBoxResult.Cancel) return false;
+            if (ans == MessageBoxResult.No) { cp.Complete(); return false; }
+            // 续传：临时设置 _objects 为 checkpoint 全集，但用 resumeCp 跳过已完成
+            _objects = cp.AllItems.ToList();
+            if (_currentBasket == null && cp.AllItems.Count > 0)
+                Log("[警告] 续传需要先选脱水框，请重新选择再点添加");
+            else
+                await AddCassettesToBasketAsync(cp);
+            return true;
         }
 
         private async void BtnStart_Click(object sender, RoutedEventArgs e)

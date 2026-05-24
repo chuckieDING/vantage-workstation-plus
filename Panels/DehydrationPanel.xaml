@@ -100,6 +100,10 @@
                             <Button x:Name="btnClearBasket" Content="清空脱水框"
                                     Style="{StaticResource Btn.Secondary}" MinWidth="90"
                                     Click="BtnClearBasket_Click" />
+                            <Button x:Name="btnExportFailures" Content="导出失败" IsEnabled="False"
+                                    Style="{StaticResource Btn.Secondary}" MinWidth="70" Margin="6,0,0,0"
+                                    ToolTip="导出上次批量的失败明细到 Excel"
+                                    Click="BtnExportFailures_Click" />
                         </StackPanel>
                     </Grid>
                     <Border Grid.Row="1" BorderBrush="{StaticResource B.Border}" BorderThickness="1" CornerRadius="6"
